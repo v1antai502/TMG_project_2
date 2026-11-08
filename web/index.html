@@ -1,0 +1,718 @@
+<!doctype html>
+<html lang="vi">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="theme-color" content="#0b1220" />
+  <title>TMG301 • Clickbait Intelligence</title>
+  <style>
+    :root{color-scheme:dark;--bg:#090e19;--panel:#101a2b;--panel2:#152237;--border:#283750;--text:#edf4ff;--muted:#94a4bb;--blue:#6199ff;--cyan:#58d9e4;--red:#ff6878;--green:#44d4a2;--amber:#ffc26b;--radius:20px;font-family:Inter,ui-sans-serif,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}
+    *{box-sizing:border-box}html{scroll-behavior:smooth}body{margin:0;color:var(--text);background:radial-gradient(ellipse at 80% 1%,#172f55 0%,transparent 37%),radial-gradient(ellipse at 6% 28%,#102b33 0%,transparent 30%),var(--bg);min-height:100vh}button,input,textarea{font:inherit}button{cursor:pointer}button:disabled{cursor:wait;opacity:.55}a{color:inherit;text-decoration:none}
+    .wrap{width:min(1180px,calc(100% - 40px));margin:auto}
+    .top{height:79px;border-bottom:1px solid #243147a8;display:flex;align-items:center}
+    .brand{display:flex;gap:12px;align-items:center;font-weight:800;letter-spacing:.02em}
+    .logo{display:grid;place-items:center;width:40px;height:40px;border-radius:13px;background:linear-gradient(135deg,#427afc,#27d3d2);font-size:22px;color:#fff;box-shadow:0 10px 35px #377ee54c}
+    .brand small{display:block;color:var(--muted);font-size:11px;font-weight:550;letter-spacing:.15em;margin-top:4px}
+    .top-inner{display:flex;justify-content:space-between;align-items:center;width:100%}
+    .status{display:flex;align-items:center;gap:9px;font-size:13px;color:#cbd7ea;background:#152238;border:1px solid #2b3d56;padding:10px 13px;border-radius:40px}
+    .dot{width:9px;height:9px;background:var(--amber);border-radius:50%;box-shadow:0 0 0 4px #ffc26b22}
+    .dot.ok{background:var(--green);box-shadow:0 0 0 4px #44d4a222}
+    .dot.err{background:var(--red);box-shadow:0 0 0 4px #ff687822}
+    .hero{padding:52px 0 30px;display:grid;grid-template-columns:1fr auto;align-items:end;gap:20px}
+    .eyebrow{font-size:11px;letter-spacing:.24em;color:var(--cyan);font-weight:800}
+    .hero h1{font-size:clamp(34px,4.5vw,57px);line-height:1.07;letter-spacing:-.055em;margin:15px 0 16px;max-width:800px}
+    .gradient{background:linear-gradient(90deg,#65a8ff,#64e5d9);background-clip:text;color:transparent}
+    .sub{color:#9aabc3;max-width:680px;line-height:1.65;margin:0;font-size:15px}
+    .hero-pill{color:#b9cce8;border:1px solid #314462;border-radius:50px;padding:11px 16px;white-space:nowrap;font-size:12px}
+
+    /* ---- Tabs ---- */
+    .tabs{display:flex;gap:6px;margin:0 0 25px;flex-wrap:wrap}
+    .tab{border:1px solid #314763;background:#152238;color:#c8d7ec;padding:12px 20px;border-radius:12px;font-weight:700;font-size:14px;transition:all .2s}
+    .tab:hover{border-color:#639dff}
+    .tab.active{background:linear-gradient(115deg,#4384f9,#3abbb9);color:#fff;border-color:transparent;box-shadow:0 6px 20px #3677e52d}
+    .tab .model-dot{display:inline-block;width:7px;height:7px;border-radius:50%;margin-left:8px;vertical-align:middle}
+    .tab .model-dot.on{background:var(--green)}
+    .tab .model-dot.off{background:#555}
+    .tab-content{display:none}
+    .tab-content.active{display:block}
+
+    /* ---- Panels ---- */
+    .panel{border:1px solid var(--border);border-radius:var(--radius);background:linear-gradient(150deg,#142037ef,#0d1729f5);box-shadow:0 18px 70px #0004;padding:25px}
+    .panel h2{font-size:18px;letter-spacing:-.02em;margin:0}
+    .panel-desc{margin:8px 0 25px;font-size:13px;color:var(--muted);line-height:1.6}
+    .label{font-size:13px;font-weight:700;display:flex;justify-content:space-between;gap:12px;margin:18px 0 9px}
+    .hint{font-weight:500;color:#8092ab}
+    .field{width:100%;border-radius:12px;border:1px solid #33455f;background:#0b1424;color:var(--text);outline:none;padding:14px 15px;transition:border-color .2s,box-shadow .2s}
+    .field:focus{border-color:#639dff;box-shadow:0 0 0 3px #639dff25}
+    .field::placeholder{color:#667791}
+    .title-input{min-height:118px;resize:vertical;line-height:1.65}
+    .lead-input{min-height:85px;resize:vertical;line-height:1.6}
+    .form-bottom{display:flex;align-items:center;gap:10px;justify-content:space-between;margin-top:22px}
+    .btn{border:0;border-radius:11px;background:linear-gradient(115deg,#4384f9,#3abbb9);color:white;padding:13px 20px;font-weight:750;box-shadow:0 10px 25px #3677e52d}
+    .btn:hover:not(:disabled){filter:brightness(1.1)}
+    .btn.secondary{background:#1d2d45;box-shadow:none;border:1px solid #314763;color:#c8d7ec}
+    .btn.danger{background:linear-gradient(115deg,#e94560,#c23a56);box-shadow:0 10px 25px #e9456022}
+    .small{font-size:12px;padding:10px 13px}
+    .kbd{font-size:12px;color:#8092ab}
+
+    /* ---- Samples ---- */
+    .samples{display:flex;gap:9px;flex-wrap:wrap;margin-top:20px}
+    .sample{background:#15253d;border:1px solid #31445d;border-radius:8px;color:#9fc4f9;padding:9px 11px;font-size:12px}
+
+    /* ---- Main grid ---- */
+    .main{display:grid;grid-template-columns:1.07fr .93fr;gap:20px;align-items:start}
+
+    /* ---- Output ---- */
+    .output{min-height:430px}
+    .blank{display:flex;flex-direction:column;justify-content:center;align-items:center;text-align:center;min-height:325px;color:var(--muted);gap:10px}
+    .bigicon{width:80px;height:80px;border:1px solid #334c67;border-radius:25px;background:linear-gradient(145deg,#142f4a,#132035);display:grid;place-items:center;font-size:36px;margin-bottom:9px}
+    .blank strong{color:#dfeafa;font-size:18px}
+    .blank p{max-width:310px;font-size:13px;line-height:1.7;margin:0}
+    .result{display:none}.result.active{display:block}
+    .result-top{display:flex;align-items:center;justify-content:space-between;gap:12px}
+    .pill{border-radius:999px;font-size:12px;padding:8px 12px;font-weight:800}
+    .pill.bad{background:#ff687824;color:#ff8d98}
+    .pill.good{background:#44d4a220;color:#67e5b4}
+    .score{text-align:center;padding:23px 0 15px}
+    .score .number{font-size:clamp(54px,7vw,77px);font-weight:850;letter-spacing:-.07em;line-height:1.1}
+    .score .number.red{color:var(--red)}.score .number.green{color:var(--green)}
+    .score .caption{color:var(--muted);font-size:13px;margin-top:4px}
+    .meter{height:14px;border-radius:999px;overflow:hidden;background:#203049;border:1px solid #34445a}
+    .fill{height:100%;width:0%;background:linear-gradient(90deg,#2cbda7,#f1b66e,#ff6675);transition:width .6s}
+    .axis{display:flex;justify-content:space-between;color:#90a1b7;font-size:11px;margin-top:7px}
+    .interpret{background:#15243a;border:1px solid #2c405c;border-radius:12px;padding:15px;margin:20px 0;color:#bdcbe0;line-height:1.65;font-size:13px}
+    .interpret strong{display:block;color:var(--text);font-size:14px;margin-bottom:3px}
+    .meta{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+    .meta .cell{background:#101d30;border:1px solid #293d56;border-radius:12px;padding:13px}
+    .meta .cap{color:#8ca1be;font-size:11px;margin-bottom:6px}
+    .meta b{font-size:15px}
+
+    /* ---- Batch text ---- */
+    .section{margin:20px 0 50px}
+    .section-head{display:flex;justify-content:space-between;align-items:center;gap:16px;margin-bottom:17px}
+    .section h2{font-size:18px;margin:0}
+    .section-sub{color:var(--muted);font-size:13px;margin-top:6px}
+    .batch-grid{display:grid;grid-template-columns:1fr 1fr;gap:20px}
+    .batch-text{width:100%;min-height:154px;line-height:1.7;resize:vertical}
+    .batch-list{display:grid;gap:10px}
+    .batch-item{padding:13px 15px;border:1px solid #2e4058;background:#101e32;border-radius:12px;display:grid;grid-template-columns:1fr auto;gap:12px;align-items:center}
+    .batch-item .name{font-size:13px;line-height:1.5}
+    .batch-item .num{font-weight:800;font-size:13px;white-space:nowrap}
+    .batch-empty{font-size:13px;color:var(--muted);line-height:1.7;margin:0}
+
+    /* ---- Drop zone ---- */
+    .drop-zone{border:2px dashed #3a5070;border-radius:var(--radius);padding:50px 30px;text-align:center;transition:all .25s;cursor:pointer;background:#0c1525}
+    .drop-zone:hover,.drop-zone.dragover{border-color:var(--cyan);background:#0e1a2e;box-shadow:0 0 40px #58d9e410}
+    .drop-zone .drop-icon{font-size:52px;margin-bottom:12px}
+    .drop-zone p{color:var(--muted);font-size:14px;margin:0 0 18px;line-height:1.6}
+    .drop-zone .upload-btns{display:flex;gap:10px;justify-content:center;flex-wrap:wrap}
+
+    /* ---- Progress ---- */
+    .progress-wrap{margin:20px 0;display:none}
+    .progress-wrap.active{display:block}
+    .progress-bar{height:8px;border-radius:99px;background:#203049;overflow:hidden;margin-top:8px}
+    .progress-bar .bar{height:100%;width:0%;background:linear-gradient(90deg,var(--cyan),var(--blue));transition:width .3s;border-radius:99px}
+    .progress-text{font-size:13px;color:var(--muted);display:flex;justify-content:space-between}
+
+    /* ---- Image results grid ---- */
+    .img-stats{display:flex;gap:16px;flex-wrap:wrap;margin:15px 0;font-size:13px;color:var(--muted)}
+    .img-stats span{background:#152238;border:1px solid #2b3d56;padding:7px 13px;border-radius:8px}
+    .img-stats .bad-count{color:var(--red)}.img-stats .good-count{color:var(--green)}
+    .sort-bar{display:flex;gap:10px;align-items:center;margin:10px 0 15px;font-size:13px;color:var(--muted)}
+    .sort-bar select{background:#0b1424;border:1px solid #33455f;color:var(--text);border-radius:8px;padding:7px 10px;font-size:13px}
+    .img-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:14px;margin-top:10px}
+    .img-card{border:1px solid #2e4058;background:#101e32;border-radius:14px;overflow:hidden;transition:border-color .2s,transform .15s}
+    .img-card:hover{transform:translateY(-2px);border-color:#4a6585}
+    .img-card.flagged{border-color:#ff687866}
+    .img-card .thumb{width:100%;aspect-ratio:16/10;object-fit:cover;display:block;background:#0a1220}
+    .img-card .card-body{padding:12px}
+    .img-card .card-name{font-size:12px;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-bottom:6px}
+    .img-card .card-score{font-size:22px;font-weight:850;letter-spacing:-.04em}
+    .img-card .card-score.red{color:var(--red)}.img-card .card-score.green{color:var(--green)}
+    .img-card .card-label{font-size:11px;font-weight:700;margin-top:4px}
+    .img-card .card-label.bad{color:#ff8d98}.img-card .card-label.good{color:#67e5b4}
+
+    /* ---- Fusion ---- */
+    .fusion-grid{display:grid;grid-template-columns:1fr 1fr;gap:20px;align-items:start}
+    .fusion-preview{max-width:100%;max-height:250px;border-radius:12px;margin-top:12px;border:1px solid #2e4058}
+
+    /* ---- Unavailable notice ---- */
+    .notice{border:1px solid #ffc26b55;background:#2e240e44;color:#ffd89e;padding:18px;border-radius:14px;font-size:13px;line-height:1.7;margin-bottom:20px}
+    .notice code{background:#1a1406;padding:3px 7px;border-radius:5px;font-size:12px}
+
+    /* ---- Error ---- */
+    .error{border:1px solid #a83e55;background:#5b1e3238;color:#ffc1c9;padding:12px 14px;border-radius:12px;font-size:13px;line-height:1.6;margin-top:15px;display:none}
+    .error.show{display:block}
+
+    /* ---- Footer ---- */
+    .footer{border-top:1px solid #21334b;color:#73859e;font-size:12px;padding:25px 0 33px;display:flex;justify-content:space-between;gap:16px}
+    .sr-only{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0}
+
+    @media(max-width:820px){
+      .hero{grid-template-columns:1fr;padding-top:40px}
+      .hero-pill{width:max-content}
+      .main,.batch-grid,.fusion-grid{grid-template-columns:1fr}
+      .output{min-height:initial}
+      .footer{flex-direction:column}
+      .wrap{width:min(100% - 28px,1180px)}
+      .panel{padding:19px}
+      .hero h1{font-size:37px}
+      .top{height:70px}
+      .img-grid{grid-template-columns:repeat(auto-fill,minmax(160px,1fr))}
+    }
+    @media(prefers-reduced-motion:reduce){*,*:before,*:after{scroll-behavior:auto!important;transition:none!important}}
+  </style>
+</head>
+<body>
+  <!-- ======== HEADER ======== -->
+  <header class="top"><div class="wrap top-inner">
+    <div class="brand"><div class="logo" aria-hidden="true">✦</div><div>CLICKBAIT INTELLIGENCE<small>TMG301 · VIETNAMESE NLP + VISION</small></div></div>
+    <div class="status" role="status"><span class="dot" id="statusDot"></span><span id="statusText">Đang kiểm tra mô hình...</span></div>
+  </div></header>
+
+  <main class="wrap">
+    <!-- ======== HERO ======== -->
+    <section class="hero"><div>
+      <div class="eyebrow">PHOBERT + CLIP · TEXT & IMAGE CLASSIFICATION</div>
+      <h1>Nhận diện <span class="gradient">clickbait</span><br>bằng văn bản &amp; hình ảnh.</h1>
+      <p class="sub">Phân tích tiêu đề, hình ảnh thumbnail, hoặc kết hợp cả hai. Hỗ trợ upload hàng loạt cả thư mục ảnh để kiểm tra nhanh.</p>
+    </div><div class="hero-pill">● API local · Dữ liệu xử lý trên máy của bạn</div></section>
+
+    <!-- ======== TABS ======== -->
+    <nav class="tabs" role="tablist">
+      <button class="tab active" data-tab="text" role="tab">📝 Văn bản</button>
+      <button class="tab" data-tab="image" role="tab">🖼️ Hình ảnh <span class="model-dot off" id="imgDot"></span></button>
+      <button class="tab" data-tab="fusion" role="tab">🔗 Kết hợp <span class="model-dot off" id="fusDot"></span></button>
+    </nav>
+
+    <!-- ============================================================ -->
+    <!-- TAB 1: TEXT ANALYSIS (existing, unchanged)                    -->
+    <!-- ============================================================ -->
+    <div id="tab-text" class="tab-content active">
+      <section class="main" aria-label="Phân tích tiêu đề">
+        <form class="panel" id="predictForm">
+          <h2>Phân tích một tiêu đề</h2>
+          <p class="panel-desc">Nhập tiêu đề bất kỳ; phần mô tả (lead) là tùy chọn.</p>
+          <label class="label" for="title">Tiêu đề bài báo <span class="hint"><span id="titleCount">0</span>/500</span></label>
+          <textarea class="field title-input" id="title" maxlength="500" required placeholder="Ví dụ: Sốc! Bí mật khiến hàng triệu người bất ngờ..." spellcheck="true"></textarea>
+          <label class="label" for="lead">Đoạn mô tả <span class="hint">Không bắt buộc</span></label>
+          <textarea class="field lead-input" id="lead" maxlength="2000" placeholder="Dán đoạn sapo/lead nếu có..." spellcheck="true"></textarea>
+          <div class="form-bottom"><span class="kbd">⌘ + Enter để phân tích</span><button class="btn" type="submit" id="predictBtn">✦ Phân tích ngay</button></div>
+          <div class="samples">
+            <button type="button" class="sample" data-sample="click">Thử tiêu đề giật tít</button>
+            <button type="button" class="sample" data-sample="normal">Thử tiêu đề thông thường</button>
+          </div>
+          <div class="error" id="error" role="alert"></div>
+        </form>
+        <article class="panel output" aria-live="polite">
+          <div class="result-top"><h2>Kết quả phân tích</h2><span class="pill good" id="resultPill" style="display:none"></span></div>
+          <div class="blank" id="empty"><div class="bigicon">⌁</div><strong>Chưa có kết quả</strong><p>Nhập tiêu đề ở bên trái và chọn "Phân tích ngay" để nhận xác suất clickbait từ PhoBERT.</p></div>
+          <div class="result" id="result">
+            <div class="score"><div class="number" id="score">—</div><div class="caption">Xác suất clickbait do mô hình dự đoán</div></div>
+            <div class="meter" role="progressbar" aria-label="Xác suất clickbait" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0" id="meter"><div class="fill" id="meterFill"></div></div>
+            <div class="axis"><span>0% · Ít nghi vấn</span><span>100% · Nhiều nghi vấn</span></div>
+            <div class="interpret"><strong id="insightTitle">Đánh giá</strong><span id="insightText"></span></div>
+            <div class="meta"><div class="cell"><div class="cap">Ngưỡng phân loại của mô hình</div><b id="threshold">—</b></div><div class="cell"><div class="cap">Thời gian API xử lý</div><b id="elapsed">—</b></div></div>
+          </div>
+        </article>
+      </section>
+
+      <!-- Batch text -->
+      <section class="section">
+        <div class="section-head"><div><h2>Phân tích hàng loạt</h2><div class="section-sub">Mỗi dòng là một tiêu đề. Tối đa 30 tiêu đề/lượt.</div></div></div>
+        <div class="batch-grid">
+          <div class="panel">
+            <label class="label" for="batch">Danh sách tiêu đề</label>
+            <textarea class="field batch-text" id="batch" placeholder="Giá vàng tăng trong phiên giao dịch sáng nay&#10;Sốc! Sự thật bất ngờ chưa ai tiết lộ&#10;Thời tiết TP.HCM ngày mai có mưa"></textarea>
+            <div class="form-bottom"><span class="kbd" id="batchCount">0 tiêu đề</span><button class="btn secondary small" id="batchBtn" type="button">Phân tích danh sách</button></div>
+            <div class="error" id="batchError" role="alert"></div>
+          </div>
+          <div class="panel">
+            <h2>Kết quả hàng loạt</h2>
+            <p class="panel-desc">Danh sách được sắp xếp theo xác suất clickbait từ cao xuống thấp.</p>
+            <div class="batch-list" id="batchResults"><p class="batch-empty">Chưa có kết quả. Nhập nhiều tiêu đề rồi chọn "Phân tích danh sách".</p></div>
+          </div>
+        </div>
+      </section>
+    </div>
+
+    <!-- ============================================================ -->
+    <!-- TAB 2: IMAGE ANALYSIS (batch upload)                         -->
+    <!-- ============================================================ -->
+    <div id="tab-image" class="tab-content">
+      <div id="imgNotice" class="notice" style="display:none">
+        ⚠️ <strong>Mô hình ảnh chưa được tải.</strong> Để sử dụng tính năng này, bạn cần train mô hình CLIP trước:<br>
+        <code>python -m trainer.train_image --out-dir outputs/clip_final</code><br>
+        Sau đó copy kết quả vào <code>models/clip_final/</code> và khởi động lại server.
+      </div>
+
+      <div class="panel">
+        <h2>🖼️ Phân tích hình ảnh hàng loạt</h2>
+        <p class="panel-desc">Upload nhiều ảnh hoặc <strong>chọn cả thư mục</strong> để kiểm tra clickbait trên thumbnail. Kết quả sắp xếp theo xác suất từ cao đến thấp.</p>
+
+        <div class="drop-zone" id="dropZone">
+          <div class="drop-icon">📁</div>
+          <p>Kéo thả ảnh hoặc thư mục vào đây<br><span style="font-size:12px;color:#667">Hỗ trợ: JPG, PNG, WebP, GIF</span></p>
+          <div class="upload-btns">
+            <button class="btn small" type="button" id="btnFiles">📎 Chọn ảnh</button>
+            <button class="btn secondary small" type="button" id="btnFolder">📂 Chọn thư mục</button>
+          </div>
+          <input type="file" multiple accept="image/*" id="fileInput" hidden>
+          <input type="file" webkitdirectory id="folderInput" hidden>
+        </div>
+
+        <!-- Progress -->
+        <div class="progress-wrap" id="imgProgress">
+          <div class="progress-text">
+            <span id="progressLabel">Đang phân tích...</span>
+            <span id="progressCount">0/0</span>
+          </div>
+          <div class="progress-bar"><div class="bar" id="progressBar"></div></div>
+        </div>
+
+        <!-- Stats -->
+        <div class="img-stats" id="imgStatsBar" style="display:none">
+          <span>📊 Tổng: <strong id="statTotal">0</strong> ảnh</span>
+          <span class="bad-count">⚠ Clickbait: <strong id="statBad">0</strong></span>
+          <span class="good-count">✓ An toàn: <strong id="statGood">0</strong></span>
+          <span>⏱ <strong id="statTime">0</strong>s</span>
+        </div>
+
+        <!-- Sort/Filter -->
+        <div class="sort-bar" id="sortBar" style="display:none">
+          <label>Sắp xếp:</label>
+          <select id="sortSelect">
+            <option value="prob-desc">Xác suất cao → thấp</option>
+            <option value="prob-asc">Xác suất thấp → cao</option>
+            <option value="name-asc">Tên file A → Z</option>
+          </select>
+          <label style="margin-left:12px">Hiển thị:</label>
+          <select id="filterSelect">
+            <option value="all">Tất cả</option>
+            <option value="clickbait">Chỉ clickbait</option>
+            <option value="safe">Chỉ non-clickbait</option>
+          </select>
+          <button class="btn secondary small" id="btnClearImages" type="button" style="margin-left:auto">🗑 Xóa kết quả</button>
+        </div>
+
+        <div class="error" id="imgError" role="alert"></div>
+
+        <!-- Results grid -->
+        <div class="img-grid" id="imgGrid"></div>
+      </div>
+    </div>
+
+    <!-- ============================================================ -->
+    <!-- TAB 3: FUSION (text + image)                                  -->
+    <!-- ============================================================ -->
+    <div id="tab-fusion" class="tab-content">
+      <div id="fusNotice" class="notice" style="display:none">
+        ⚠️ <strong>Mô hình kết hợp chưa được tải.</strong> Để sử dụng tính năng này, bạn cần train mô hình Fusion trước:<br>
+        <code>python -m trainer.train_fusion --out-dir outputs/fusion_final</code><br>
+        Sau đó copy kết quả vào <code>models/fusion_final/</code> và khởi động lại server.
+      </div>
+
+      <section class="main">
+        <form class="panel" id="fusionForm">
+          <h2>🔗 Phân tích kết hợp</h2>
+          <p class="panel-desc">Kết hợp tiêu đề + hình ảnh thumbnail để phát hiện clickbait chính xác hơn (tiêu đề giật tít nhưng ảnh không liên quan).</p>
+          <label class="label" for="fusTitle">Tiêu đề bài báo</label>
+          <textarea class="field" id="fusTitle" maxlength="500" required placeholder="Nhập tiêu đề..." style="min-height:80px;resize:vertical"></textarea>
+          <label class="label" for="fusLead">Đoạn mô tả <span class="hint">Không bắt buộc</span></label>
+          <textarea class="field" id="fusLead" maxlength="2000" placeholder="Dán lead nếu có..." style="min-height:60px;resize:vertical"></textarea>
+          <label class="label">Hình ảnh thumbnail</label>
+          <div class="drop-zone" id="fusDropZone" style="padding:25px 20px">
+            <p style="margin:0 0 10px">Kéo ảnh vào đây hoặc</p>
+            <button class="btn small" type="button" id="btnFusFile">📎 Chọn ảnh</button>
+            <input type="file" accept="image/*" id="fusFileInput" hidden>
+          </div>
+          <img id="fusPreview" class="fusion-preview" style="display:none" alt="Preview">
+          <div class="form-bottom">
+            <span class="kbd" id="fusStatus"></span>
+            <button class="btn" type="submit" id="fusBtn">✦ Phân tích kết hợp</button>
+          </div>
+          <div class="error" id="fusError" role="alert"></div>
+        </form>
+        <article class="panel output" aria-live="polite">
+          <div class="result-top"><h2>Kết quả phân tích</h2><span class="pill good" id="fusResultPill" style="display:none"></span></div>
+          <div class="blank" id="fusEmpty"><div class="bigicon">🔗</div><strong>Chưa có kết quả</strong><p>Nhập tiêu đề và ảnh để nhận xác suất clickbait từ mô hình Fusion (PhoBERT + CLIP).</p></div>
+          <div class="result" id="fusResult">
+            <div class="score"><div class="number" id="fusScore">—</div><div class="caption">Xác suất clickbait (Fusion: text + image)</div></div>
+            <div class="meter" role="progressbar"><div class="fill" id="fusMeterFill"></div></div>
+            <div class="axis"><span>0% · Ít nghi vấn</span><span>100% · Nhiều nghi vấn</span></div>
+            <div class="interpret"><strong id="fusInsightTitle">Đánh giá</strong><span id="fusInsightText"></span></div>
+            <div class="meta"><div class="cell"><div class="cap">Ngưỡng phân loại</div><b id="fusThreshold">—</b></div><div class="cell"><div class="cap">Thời gian xử lý</div><b id="fusElapsed">—</b></div></div>
+          </div>
+        </article>
+      </section>
+    </div>
+
+  </main>
+
+  <footer class="wrap footer">
+    <span>© TMG301 · Vietnamese Clickbait Detector (Text + Image)</span>
+    <span>Điểm mô hình không phải xác suất chính xác tuyệt đối hay bằng chứng tin giả. Chỉ mang tính hỗ trợ đánh giá.</span>
+  </footer>
+
+  <!-- ======== JAVASCRIPT ======== -->
+  <script>
+  'use strict';
+  const $=id=>document.getElementById(id);
+
+  // ---- State ----
+  let modelThreshold = .5;
+  let hasImageModel = false;
+  let hasFusionModel = false;
+  let imageResults = []; // [{name, prob, label, objectUrl}]
+
+  // ---- Utilities ----
+  async function getJSON(url, options={}) {
+    const response = await fetch(url, {...options, headers:{'Content-Type':'application/json',...(options.headers||{})}});
+    let data; try{data=await response.json()}catch{throw new Error(`Máy chủ trả về lỗi HTTP ${response.status}`)}
+    if(!response.ok) throw new Error(typeof data.detail==='string'?data.detail:`Yêu cầu thất bại (HTTP ${response.status})`);
+    return data;
+  }
+  function setError(id, message) { const el=$(id); el.textContent=message||''; el.classList.toggle('show',Boolean(message)); }
+  function explanation(p, label) {
+    if(label==='clickbait') return ['Tiêu đề có dấu hiệu clickbait','Mô hình xếp tiêu đề vào nhóm clickbait. Bạn nên đọc nội dung và kiểm chứng nguồn trước khi chia sẻ.'];
+    return ['Chưa bị phân loại là clickbait','Theo ngưỡng mô hình hiện tại, tiêu đề này được phân loại non-clickbait. Kết luận không đảm bảo nội dung bài báo là chính xác.'];
+  }
+
+  // ---- Tab switching ----
+  document.querySelectorAll('.tab').forEach(tab => {
+    tab.addEventListener('click', () => {
+      document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+      document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+      tab.classList.add('active');
+      $('tab-' + tab.dataset.tab).classList.add('active');
+    });
+  });
+
+  // ---- Health check ----
+  function setStatus(online, data) {
+    $('statusDot').className = 'dot ' + (online ? 'ok' : 'err');
+    $('statusText').textContent = online ? `Mô hình đang chạy · ${data.device||'unknown'}` : 'Không kết nối API';
+    if (online && typeof data.threshold === 'number') modelThreshold = data.threshold;
+    if (online && data.models) {
+      hasImageModel = data.models.image;
+      hasFusionModel = data.models.fusion;
+      $('imgDot').className = 'model-dot ' + (hasImageModel ? 'on' : 'off');
+      $('fusDot').className = 'model-dot ' + (hasFusionModel ? 'on' : 'off');
+      $('imgNotice').style.display = hasImageModel ? 'none' : 'block';
+      $('fusNotice').style.display = hasFusionModel ? 'none' : 'block';
+    }
+  }
+  async function checkHealth() { try{setStatus(true, await getJSON('/health'));}catch(e){setStatus(false,{});} }
+
+  // ============================================================
+  // TEXT TAB (same logic as original)
+  // ============================================================
+  $('title').addEventListener('input', ()=>{$('titleCount').textContent=$('title').value.length});
+  document.querySelectorAll('[data-sample]').forEach(btn=>btn.addEventListener('click',()=>{
+    $('title').value=btn.dataset.sample==='click'?'Sốc! Bí mật khiến hàng triệu người bất ngờ':'Giá vàng trong nước tăng trong phiên giao dịch sáng nay';
+    $('lead').value='';$('titleCount').textContent=$('title').value.length;$('title').focus()
+  }));
+  $('predictForm').addEventListener('submit', async e => {
+    e.preventDefault();
+    const title=$('title').value.trim();
+    if(!title){setError('error','Vui lòng nhập tiêu đề.');return}
+    setError('error','');$('predictBtn').disabled=true;$('predictBtn').textContent='Đang phân tích...';
+    try {
+      const data=await getJSON('/predict',{method:'POST',body:JSON.stringify({headlines:[{id:'single',title,lead:$('lead').value.trim()}]})});
+      if(!data.results||!data.results.length) throw new Error('API không trả về kết quả.');
+      const r=data.results[0],p=Math.max(0,Math.min(1,Number(r.prob_clickbait)));
+      if(!Number.isFinite(p)) throw new Error('Điểm dự đoán không hợp lệ');
+      const isBad=r.label==='clickbait',insight=explanation(p,r.label);
+      $('empty').style.display='none';$('result').classList.add('active');
+      $('score').textContent=(p*100).toFixed(2)+'%';$('score').className='number '+(isBad?'red':'green');
+      $('meterFill').style.width=(p*100)+'%';$('meter').setAttribute('aria-valuenow',(p*100).toFixed(2));
+      $('resultPill').style.display='inline-flex';$('resultPill').className='pill '+(isBad?'bad':'good');
+      $('resultPill').textContent=isBad?'⚠ CLICKBAIT':'✓ NON-CLICKBAIT';
+      $('insightTitle').textContent=insight[0];$('insightText').textContent=insight[1];
+      $('threshold').textContent=(modelThreshold*100).toFixed(0)+'%';
+      $('elapsed').textContent=Number(data.seconds||0).toFixed(3)+' giây';
+    } catch(error){setError('error','Không thể phân tích: '+error.message)}
+    finally{$('predictBtn').disabled=false;$('predictBtn').textContent='✦ Phân tích ngay'}
+  });
+
+  // Batch text
+  function batchLines(){return $('batch').value.split(/\r?\n/).map(s=>s.trim()).filter(Boolean)}
+  $('batch').addEventListener('input',()=>{$('batchCount').textContent=batchLines().length+' tiêu đề'});
+  $('batchBtn').addEventListener('click', async()=>{
+    const titles=batchLines();
+    if(!titles.length){setError('batchError','Nhập ít nhất một tiêu đề.');return}
+    if(titles.length>30){setError('batchError','Chỉ phân tích tối đa 30 tiêu đề mỗi lượt.');return}
+    if(titles.some(x=>x.length>500)){setError('batchError','Mỗi tiêu đề không được vượt quá 500 ký tự.');return}
+    setError('batchError','');$('batchBtn').disabled=true;$('batchBtn').textContent='Đang xử lý...';
+    try {
+      const data=await getJSON('/predict',{method:'POST',body:JSON.stringify({headlines:titles.map((title,i)=>({id:String(i),title,lead:''}))})});
+      const rows=(data.results||[]).map(r=>({title:titles[Number(r.id)],prob:Number(r.prob_clickbait),label:r.label})).filter(r=>r.title&&Number.isFinite(r.prob)).sort((a,b)=>b.prob-a.prob);
+      if(!rows.length) throw new Error('API không trả về kết quả');
+      $('batchResults').replaceChildren(...rows.map(r=>{
+        const item=document.createElement('div');item.className='batch-item';
+        const name=document.createElement('div');name.className='name';name.textContent=r.title;
+        const num=document.createElement('span');num.className='num';num.style.color=r.label==='clickbait'?'var(--red)':'var(--green)';num.textContent=(r.prob*100).toFixed(2)+'%';
+        item.append(name,num);return item
+      }));
+    } catch(error){setError('batchError','Không thể phân tích: '+error.message)}
+    finally{$('batchBtn').disabled=false;$('batchBtn').textContent='Phân tích danh sách'}
+  });
+  document.addEventListener('keydown',e=>{if(e.metaKey&&e.key==='Enter'){e.preventDefault();$('predictForm').requestSubmit()}});
+
+  // ============================================================
+  // IMAGE TAB (batch upload)
+  // ============================================================
+  function fileToBase64(file) {
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onload = () => resolve(reader.result);
+      reader.onerror = reject;
+      reader.readAsDataURL(file);
+    });
+  }
+
+  function collectImageFiles(fileList) {
+    const images = [];
+    for (const file of fileList) {
+      if (file.type.startsWith('image/') || /\.(jpe?g|png|gif|webp|bmp|tiff?)$/i.test(file.name)) {
+        images.push(file);
+      }
+    }
+    return images;
+  }
+
+  async function processImageBatch(files) {
+    if (!files.length) return;
+    setError('imgError', '');
+    imageResults = [];
+    const CHUNK = 16;
+    const progress = $('imgProgress');
+    progress.classList.add('active');
+    $('imgStatsBar').style.display = 'none';
+    $('sortBar').style.display = 'none';
+    $('imgGrid').innerHTML = '';
+    const totalStart = Date.now();
+    let processed = 0;
+
+    for (let i = 0; i < files.length; i += CHUNK) {
+      const chunk = files.slice(i, i + CHUNK);
+      $('progressLabel').textContent = `Đang phân tích (batch ${Math.floor(i/CHUNK)+1}/${Math.ceil(files.length/CHUNK)})...`;
+      $('progressCount').textContent = `${processed}/${files.length}`;
+      $('progressBar').style.width = (processed / files.length * 100) + '%';
+
+      // Convert to base64
+      const items = [];
+      const objectUrls = [];
+      for (let j = 0; j < chunk.length; j++) {
+        const b64 = await fileToBase64(chunk[j]);
+        items.push({ id: String(i + j), base64: b64 });
+        objectUrls.push(URL.createObjectURL(chunk[j]));
+      }
+
+      try {
+        const data = await getJSON('/predict-image', {
+          method: 'POST',
+          body: JSON.stringify({ images: items })
+        });
+        for (let j = 0; j < chunk.length; j++) {
+          const r = data.results[j];
+          imageResults.push({
+            name: chunk[j].name,
+            prob: r.prob_clickbait,
+            label: r.label,
+            objectUrl: objectUrls[j]
+          });
+        }
+      } catch (err) {
+        setError('imgError', `Lỗi batch ${Math.floor(i/CHUNK)+1}: ${err.message}`);
+        // continue with remaining batches
+        for (let j = 0; j < chunk.length; j++) {
+          imageResults.push({ name: chunk[j].name, prob: -1, label: 'error', objectUrl: objectUrls[j] });
+        }
+      }
+      processed += chunk.length;
+    }
+
+    $('progressBar').style.width = '100%';
+    $('progressLabel').textContent = 'Hoàn tất!';
+    $('progressCount').textContent = `${files.length}/${files.length}`;
+    setTimeout(() => progress.classList.remove('active'), 2000);
+
+    const elapsed = ((Date.now() - totalStart) / 1000).toFixed(1);
+    const bad = imageResults.filter(r => r.label === 'clickbait').length;
+    const good = imageResults.filter(r => r.label === 'non-clickbait').length;
+    $('statTotal').textContent = imageResults.length;
+    $('statBad').textContent = bad;
+    $('statGood').textContent = good;
+    $('statTime').textContent = elapsed;
+    $('imgStatsBar').style.display = 'flex';
+    $('sortBar').style.display = 'flex';
+
+    renderImageGrid();
+  }
+
+  function renderImageGrid() {
+    const sort = $('sortSelect').value;
+    const filter = $('filterSelect').value;
+    let items = [...imageResults];
+    if (filter === 'clickbait') items = items.filter(r => r.label === 'clickbait');
+    else if (filter === 'safe') items = items.filter(r => r.label === 'non-clickbait');
+
+    if (sort === 'prob-desc') items.sort((a, b) => b.prob - a.prob);
+    else if (sort === 'prob-asc') items.sort((a, b) => a.prob - b.prob);
+    else if (sort === 'name-asc') items.sort((a, b) => a.name.localeCompare(b.name));
+
+    const grid = $('imgGrid');
+    grid.innerHTML = '';
+    for (const r of items) {
+      const card = document.createElement('div');
+      card.className = 'img-card' + (r.label === 'clickbait' ? ' flagged' : '');
+      const isBad = r.label === 'clickbait';
+      const pct = r.prob >= 0 ? (r.prob * 100).toFixed(1) + '%' : 'Lỗi';
+      card.innerHTML = `
+        <img class="thumb" src="${r.objectUrl}" alt="${r.name}" loading="lazy">
+        <div class="card-body">
+          <div class="card-name" title="${r.name}">${r.name}</div>
+          <div class="card-score ${isBad?'red':'green'}">${pct}</div>
+          <div class="card-label ${isBad?'bad':'good'}">${isBad?'⚠ CLICKBAIT':'✓ Non-clickbait'}</div>
+        </div>`;
+      grid.appendChild(card);
+    }
+    if (!items.length) {
+      grid.innerHTML = '<p style="color:var(--muted);font-size:13px;grid-column:1/-1;text-align:center;padding:40px 0">Không có kết quả phù hợp với bộ lọc.</p>';
+    }
+  }
+
+  // File & folder selection
+  $('btnFiles').addEventListener('click', () => $('fileInput').click());
+  $('btnFolder').addEventListener('click', () => $('folderInput').click());
+  $('fileInput').addEventListener('change', e => {
+    const files = collectImageFiles(e.target.files);
+    if (files.length) processImageBatch(files);
+    e.target.value = '';
+  });
+  $('folderInput').addEventListener('change', e => {
+    const files = collectImageFiles(e.target.files);
+    if (files.length) processImageBatch(files);
+    else setError('imgError', 'Thư mục không chứa file ảnh nào.');
+    e.target.value = '';
+  });
+
+  // Drag and drop
+  const dropZone = $('dropZone');
+  ['dragenter','dragover'].forEach(evt => dropZone.addEventListener(evt, e => { e.preventDefault(); dropZone.classList.add('dragover'); }));
+  ['dragleave','drop'].forEach(evt => dropZone.addEventListener(evt, e => { e.preventDefault(); dropZone.classList.remove('dragover'); }));
+  dropZone.addEventListener('drop', async e => {
+    const items = e.dataTransfer.items;
+    const files = [];
+    // Handle folder drops (webkitGetAsEntry)
+    if (items && items[0] && items[0].webkitGetAsEntry) {
+      const entries = [];
+      for (const item of items) {
+        const entry = item.webkitGetAsEntry();
+        if (entry) entries.push(entry);
+      }
+      const allFiles = await readAllEntries(entries);
+      files.push(...collectImageFiles(allFiles));
+    } else {
+      files.push(...collectImageFiles(e.dataTransfer.files));
+    }
+    if (files.length) processImageBatch(files);
+    else setError('imgError', 'Không tìm thấy file ảnh nào.');
+  });
+
+  function readAllEntries(entries) {
+    return new Promise(resolve => {
+      const files = [];
+      let pending = 0;
+      function traverse(entry) {
+        pending++;
+        if (entry.isFile) {
+          entry.file(f => { files.push(f); if (--pending === 0) resolve(files); });
+        } else if (entry.isDirectory) {
+          const reader = entry.createReader();
+          reader.readEntries(entries => {
+            pending--;
+            for (const e of entries) traverse(e);
+            if (pending === 0) resolve(files);
+          });
+        }
+      }
+      for (const e of entries) traverse(e);
+      if (!entries.length) resolve(files);
+    });
+  }
+
+  // Sort & filter
+  $('sortSelect').addEventListener('change', renderImageGrid);
+  $('filterSelect').addEventListener('change', renderImageGrid);
+  $('btnClearImages').addEventListener('click', () => {
+    imageResults.forEach(r => { if (r.objectUrl) URL.revokeObjectURL(r.objectUrl); });
+    imageResults = [];
+    $('imgGrid').innerHTML = '';
+    $('imgStatsBar').style.display = 'none';
+    $('sortBar').style.display = 'none';
+  });
+
+  // ============================================================
+  // FUSION TAB
+  // ============================================================
+  let fusionImageB64 = null;
+  $('btnFusFile').addEventListener('click', () => $('fusFileInput').click());
+  $('fusFileInput').addEventListener('change', async e => {
+    if (e.target.files[0]) {
+      fusionImageB64 = await fileToBase64(e.target.files[0]);
+      $('fusPreview').src = fusionImageB64;
+      $('fusPreview').style.display = 'block';
+      $('fusStatus').textContent = '✓ Ảnh đã tải: ' + e.target.files[0].name;
+    }
+    e.target.value = '';
+  });
+
+  // Fusion drop zone
+  const fusDropZone = $('fusDropZone');
+  ['dragenter','dragover'].forEach(evt => fusDropZone.addEventListener(evt, e => { e.preventDefault(); fusDropZone.classList.add('dragover'); }));
+  ['dragleave','drop'].forEach(evt => fusDropZone.addEventListener(evt, e => { e.preventDefault(); fusDropZone.classList.remove('dragover'); }));
+  fusDropZone.addEventListener('drop', async e => {
+    const file = [...e.dataTransfer.files].find(f => f.type.startsWith('image/'));
+    if (file) {
+      fusionImageB64 = await fileToBase64(file);
+      $('fusPreview').src = fusionImageB64;
+      $('fusPreview').style.display = 'block';
+      $('fusStatus').textContent = '✓ Ảnh đã tải: ' + file.name;
+    }
+  });
+
+  $('fusionForm').addEventListener('submit', async e => {
+    e.preventDefault();
+    const title = $('fusTitle').value.trim();
+    if (!title) { setError('fusError', 'Vui lòng nhập tiêu đề.'); return; }
+    if (!fusionImageB64) { setError('fusError', 'Vui lòng chọn hình ảnh.'); return; }
+    setError('fusError', ''); $('fusBtn').disabled = true; $('fusBtn').textContent = 'Đang phân tích...';
+    try {
+      const data = await getJSON('/predict-fusion', {
+        method: 'POST',
+        body: JSON.stringify({
+          items: [{ id: 'fus1', title, lead: $('fusLead').value.trim(), image_base64: fusionImageB64 }]
+        })
+      });
+      if (!data.results || !data.results.length) throw new Error('API không trả về kết quả.');
+      const r = data.results[0], p = Math.max(0, Math.min(1, Number(r.prob_clickbait)));
+      const isBad = r.label === 'clickbait', insight = explanation(p, r.label);
+      $('fusEmpty').style.display = 'none'; $('fusResult').classList.add('active');
+      $('fusScore').textContent = (p*100).toFixed(2)+'%'; $('fusScore').className = 'number '+(isBad?'red':'green');
+      $('fusMeterFill').style.width = (p*100)+'%';
+      $('fusResultPill').style.display = 'inline-flex'; $('fusResultPill').className = 'pill '+(isBad?'bad':'good');
+      $('fusResultPill').textContent = isBad ? '⚠ CLICKBAIT' : '✓ NON-CLICKBAIT';
+      $('fusInsightTitle').textContent = insight[0]; $('fusInsightText').textContent = insight[1];
+      $('fusThreshold').textContent = (modelThreshold*100).toFixed(0)+'%';
+      $('fusElapsed').textContent = Number(data.seconds||0).toFixed(3)+' giây';
+    } catch (err) { setError('fusError', 'Không thể phân tích: ' + err.message); }
+    finally { $('fusBtn').disabled = false; $('fusBtn').textContent = '✦ Phân tích kết hợp'; }
+  });
+
+  // ---- Init ----
+  checkHealth();
+  </script>
+</body>
+</html>

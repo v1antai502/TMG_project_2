@@ -1,0 +1,70 @@
+<!doctype html>
+<html lang="vi">
+  <head>
+    <meta charset="utf-8" />
+    <title>Clickbait Detector</title>
+    <style>
+      body { width: 290px; margin: 0; padding: 14px; font: 13px/1.4 system-ui, "Segoe UI", Roboto, Arial, sans-serif; color: #202124; }
+      h1 { font-size: 15px; margin: 0 0 10px; }
+      .row { display: flex; align-items: center; justify-content: space-between; margin: 8px 0; gap: 8px; }
+      .status { padding: 6px 8px; border-radius: 6px; background: #f1f3f4; margin-bottom: 10px; }
+      .ok { background: #e6f4ea; color: #137333; }
+      .err { background: #fce8e6; color: #a50e0e; }
+      .stats { font-size: 22px; font-weight: 700; color: #d93025; }
+      .muted { color: #5f6368; font-size: 12px; }
+      .site { border: 1px solid #dadce0; border-radius: 6px; padding: 8px; margin: 10px 0; }
+      .site button { width: 100%; padding: 6px; margin-top: 6px; border: 0; border-radius: 4px; background: #1a73e8; color: #fff; font: inherit; cursor: pointer; }
+      .site button.secondary { background: #f1f3f4; color: #202124; }
+      input[type="range"] { flex: 1; }
+      input[type="text"] { width: 100%; box-sizing: border-box; padding: 4px; }
+      details { margin-top: 10px; }
+      [hidden] { display: none !important; }
+    </style>
+  </head>
+  <body>
+    <h1>Clickbait Detector</h1>
+    <div id="status" class="status">Đang kiểm tra dịch vụ…</div>
+
+    <div id="statsRow" class="row">
+      <div><span id="flagged" class="stats">–</span> <span class="muted">tiêu đề clickbait</span></div>
+      <span id="scored" class="muted"></span>
+    </div>
+
+    <div id="enableBox" class="site" hidden>
+      <div>Trang <b id="enableHost"></b> chưa được bật.</div>
+      <button id="enableSite">Bật trên trang web này</button>
+      <div class="muted">Chrome sẽ hỏi quyền truy cập riêng cho trang này. Mô hình được huấn luyện trên 8 báo; độ chính xác ở các trang khác chưa được kiểm chứng.</div>
+    </div>
+    <div id="disableBox" class="site" hidden>
+      <div class="muted">Bạn đã tự bật tiện ích trên <b id="disableHost"></b>.</div>
+      <button id="disableSite" class="secondary">Tắt trên trang web này</button>
+    </div>
+
+    <div class="row">
+      <label for="enabled">Bật đánh dấu</label>
+      <input id="enabled" type="checkbox" />
+    </div>
+    <div class="row">
+      <label for="showSafe">Hiện cả tiêu đề an toàn</label>
+      <input id="showSafe" type="checkbox" />
+    </div>
+    <div class="row">
+      <label for="threshold">Ngưỡng</label>
+      <input id="threshold" type="range" min="0.3" max="0.9" step="0.05" />
+      <span id="thresholdValue"></span>
+    </div>
+    <div class="muted">Ngưỡng cao hơn: ít cảnh báo nhầm hơn nhưng bỏ sót nhiều hơn.</div>
+
+    <details id="serviceBox">
+      <summary>Dịch vụ mô hình</summary>
+      <label class="muted" for="apiUrl">Địa chỉ</label>
+      <input id="apiUrl" type="text" spellcheck="false" placeholder="http://127.0.0.1:8000" />
+      <label class="muted" for="apiKey">Khóa truy cập (nếu có)</label>
+      <input id="apiKey" type="password" spellcheck="false" />
+      <div class="site"><button id="saveService">Lưu</button></div>
+      <div class="muted">Mặc định: http://127.0.0.1:8000 trên máy này. Trên điện thoại: địa chỉ máy tính trong cùng mạng Wi-Fi, ví dụ http://192.168.1.10:8000, và khóa truy cập của dịch vụ.</div>
+    </details>
+
+    <script src="popup.js"></script>
+  </body>
+</html>

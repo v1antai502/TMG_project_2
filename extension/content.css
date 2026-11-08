@@ -1,0 +1,29 @@
+/* Badges added next to headlines. Prefixed and explicit so site styles don't leak in. */
+.cbd-badge {
+  display: inline-block;
+  margin: 0 0 0 6px;
+  padding: 1px 6px;
+  border-radius: 4px;
+  font: 600 11px/16px system-ui, -apple-system, "Segoe UI", Roboto, Arial, sans-serif;
+  letter-spacing: 0;
+  text-transform: none;
+  vertical-align: middle;
+  white-space: nowrap;
+  cursor: help;
+}
+
+.cbd-badge--bait {
+  color: #ffffff;
+  background: #d93025;
+}
+
+.cbd-badge--safe {
+  color: #137333;
+  background: #e6f4ea;
+}
+
+a.cbd-flagged {
+  text-decoration: underline wavy #d93025 !important;
+  text-decoration-thickness: 1px !important;
+  text-underline-offset: 3px !important;
+}

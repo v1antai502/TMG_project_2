@@ -1,0 +1,27 @@
+# Local test environment (Python 3.11). Kaggle GPU images already ship torch,
+# torchvision and transformers with CUDA; only pyvi has to be installed there.
+#
+# For a CPU-only local install of torch (much smaller download), run this first:
+#   pip install torch torchvision --index-url https://download.pytorch.org/whl/cpu
+
+# data + EDA
+numpy>=1.26
+pandas>=2.0
+pillow>=10.0
+matplotlib>=3.8
+
+# model + training
+torch>=2.3
+torchvision>=0.17
+transformers>=4.40
+pyvi>=0.1.1
+scikit-learn>=1.4
+tqdm>=4.66
+
+# model service for the browser extension (service/app.py)
+fastapi>=0.110
+uvicorn>=0.29
+
+# notebooks
+ipykernel>=6.29
+notebook>=7.0

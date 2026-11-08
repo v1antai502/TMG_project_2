@@ -1,0 +1,9 @@
+# Packages for the model service. torch is installed separately by start_service
+# (CPU build, much smaller): pip install torch --index-url https://download.pytorch.org/whl/cpu
+transformers>=4.40
+pyvi>=0.1.1
+numpy>=1.26
+pandas>=2.0
+pillow>=10.0
+fastapi>=0.110
+uvicorn>=0.29
